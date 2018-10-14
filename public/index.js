@@ -1,6 +1,7 @@
 var socket = io.connect();
 
 var players = {};
+var gameObjects = [];
 
 var moveB = false;
 var moveF = false;
@@ -21,6 +22,9 @@ document.addEventListener("keydown", function(e){
 			break;
 		case 65: // A
 			rotateL = true;
+			break;
+		case 32: // A
+			socket.emit('shoot', "");
 			break;
 	}
 });
@@ -48,6 +52,10 @@ socket.on('updatePlayers', function(data){
 	document.getElementsByTagName("body")[0].style.backgroundColor = players[socket.id].color;
 });
 
+socket.on('updateGameObjects', function(data){
+	gameObjects = data;
+});
+
 function sendData(){
 	var data = {moveB: moveB, moveF: moveF, rotateR: rotateR, rotateL: rotateL};
 
@@ -64,6 +72,7 @@ function draw(){
 	background("#FFFFFF");
 
 	// Render players
+	document.getElementById("scores").innerHTML = "";
 	for(var key in players)
 	{
 		push();
@@ -75,6 +84,35 @@ function draw(){
 		rotate(radians(-player.rot));
 		rect(10, 0, player.w, 20);
 		ellipse(0, 0, player.w);
+
+		var scores = document.getElementById("scores");
+		var colorBox = document.createElement("div");
+		colorBox.className = "colorBox";
+		colorBox.style.backgroundColor = player.color;
+		colorBox.innerHTML = player.score;
+		scores.appendChild(colorBox);
+
+		pop();
+	}
+
+	// Render gameobjects
+	for(var i = 0; i < gameObjects.length; i++)
+	{
+		var obj = gameObjects[i];
+		push();
+		strokeWeight(2);
+		translate(obj.x, obj.y);
+		if(obj.type == "bullet")
+		{
+			fill(200);
+			ellipse(0, 0, obj.w);
+		}
+		else if(obj.type == "obstacle")
+		{
+			rectMode(CORNER);
+			fill("#000000");
+			rect(0,0,obj.w, obj.h);
+		}
 		pop();
 	}
 }
