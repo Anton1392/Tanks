@@ -44,6 +44,8 @@ document.addEventListener("keyup", function(e){
 
 socket.on('updatePlayers', function(data){
 	players = data;
+
+	document.getElementsByTagName("body")[0].style.backgroundColor = players[socket.id].color;
 });
 
 function sendData(){
@@ -51,7 +53,7 @@ function sendData(){
 
 	socket.emit('getData', data);
 }
-setInterval(sendData, 1000/144); // 144hz input rate
+setInterval(sendData, 1000/60); // 144hz input rate
 
 function setup(){
 	createCanvas(1024, 768);
@@ -59,17 +61,20 @@ function setup(){
 
 function draw(){
 	clear();
-	background(51);
+	background("#FFFFFF");
 
+	// Render players
 	for(var key in players)
 	{
 		push();
 		var player = players[key];
 		rectMode(CENTER);
 		fill(player.color);
+		strokeWeight(2);
 		translate(player.x, player.y);
 		rotate(radians(-player.rot));
-		rect(0, 0, player.w, player.h, 0, 40, 40, 0);
+		rect(10, 0, player.w, 20);
+		ellipse(0, 0, player.w);
 		pop();
 	}
 }
